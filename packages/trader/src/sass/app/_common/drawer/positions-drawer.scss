@@ -1,4 +1,5 @@
-$header-height: 3.6em;
+$header-height: 6.4em;
+$footer-height: 6em;
 
 // Trade page animation performance fix #perfmatters
 .trade-container + .positions-drawer {
@@ -6,16 +7,11 @@ $header-height: 3.6em;
 }
 
 .positions-drawer {
-    $MARGIN_TOP: #{$POSITIONS_DRAWER_MARGIN * 2};
-    $MARGIN_BOTTOM: #{$POSITIONS_DRAWER_MARGIN * 2};
-
-    width: 240px;
-    height: calc(100svh - #{$HEADER_HEIGHT} - #{$FOOTER_HEIGHT} - #{$MARGIN_TOP} - #{$MARGIN_BOTTOM});
-    margin-top: #{$MARGIN_TOP};
+    width: $POSITIONS_DRAWER_WIDTH;
+    height: 100%;
     position: fixed;
     z-index: 2;
-    top: #{$HEADER_HEIGHT};
-    left: 4px;
+    top: 0;
     box-sizing: border-box;
     opacity: 0;
     transform: translateX(-100%);
@@ -23,8 +19,8 @@ $header-height: 3.6em;
     transition:
         opacity 0.3s ease,
         transform 0.3s ease;
+    border-right: 1px solid var(--color-surface-border);
     border-radius: $BORDER_RADIUS;
-    background-color: var(--color-surface-section);
     color: var(--color-text-primary);
 
     &__bg {
@@ -32,7 +28,7 @@ $header-height: 3.6em;
         z-index: 2;
         top: 0;
         left: 0;
-        width: 260px;
+        width: $POSITIONS_DRAWER_WIDTH;
         height: 100%;
         background: var(--color-surface-primary);
         transition: opacity 0.25s linear;
@@ -44,7 +40,7 @@ $header-height: 3.6em;
         }
     }
     &--open {
-        transform: translateX(#{$POSITIONS_DRAWER_MARGIN});
+        transform: translateX(0);
         opacity: 1;
     }
     &__header {
@@ -52,7 +48,7 @@ $header-height: 3.6em;
         display: flex;
         flex-direction: row;
         align-items: center;
-        padding: 0 1em;
+        padding: 1.6rem;
         @include rtl {
             direction: rtl;
         }
@@ -68,8 +64,7 @@ $header-height: 3.6em;
         }
     }
     &__body {
-        height: calc(100% - #{$header-height * 2.7});
-        padding: 0.8em 0 0;
+        height: calc(100% - #{$header-height + $footer-height});
         box-sizing: border-box;
         overflow: hidden;
         align-self: center;
@@ -90,7 +85,7 @@ $header-height: 3.6em;
     }
     &__footer {
         position: relative;
-        height: 6em;
+        height: $footer-height;
         display: flex;
         align-items: center;
         border-top: 1px solid var(--color-surface-border);

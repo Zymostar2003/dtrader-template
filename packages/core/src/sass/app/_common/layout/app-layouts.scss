@@ -95,8 +95,8 @@
 
 /** @define app-contents; weak */
 .app-contents {
-    margin: $HEADER_HEIGHT 0 $FOOTER_HEIGHT;
-    height: calc(100vh - #{$HEADER_HEIGHT} - #{$FOOTER_HEIGHT});
+    margin-left: 7.2rem; // Sidebar width
+    height: 100vh;
     overflow: hidden;
     backface-visibility: hidden;
     background-color: var(--color-surface-primary);
@@ -126,7 +126,8 @@
     }
 
     @include mobile-or-tablet-screen {
-        // no footer:
+        // no sidebar on mobile:
+        margin-left: 0;
         margin-bottom: 0;
         height: calc(100% - #{$MOBILE_HEADER_HEIGHT});
         position: relative;

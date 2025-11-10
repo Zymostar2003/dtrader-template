@@ -1,0 +1,122 @@
+/** @define sidebar */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 7.2rem;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface-primary);
+    border-right: 1px solid var(--color-surface-border);
+    transition: opacity 0.3s;
+    backface-visibility: hidden;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 7.2rem;
+        padding: 1.6rem;
+    }
+
+    &__nav {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding: 0.8rem 0;
+        justify-content: space-between;
+    }
+
+    &__nav-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    &__nav-utility {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        padding-bottom: 0.8rem;
+    }
+
+    &__item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        margin: 0 auto;
+        border: none;
+        border-radius: 8px;
+        background-color: transparent;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        outline: none;
+
+        &:hover {
+            background-color: var(--color-interactive-hover);
+            color: var(--color-text-primary);
+        }
+
+        &:active {
+            transform: scale(0.95);
+        }
+
+        &--active {
+            background-color: var(--color-interactive-active);
+            color: var(--color-text-primary);
+            font-weight: bold;
+
+            &:hover {
+                background-color: var(--color-interactive-active);
+            }
+        }
+    }
+
+    &__item-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    &__item-badge {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: var(--color-status-danger);
+        color: var(--color-text-on-color);
+        font-size: 10px;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    &__tooltip {
+        .dc-popover__bubble {
+            margin-left: 8px;
+        }
+    }
+
+    // Hide on mobile and tablet
+    @include mobile-or-tablet-screen {
+        display: none;
+    }
+}

@@ -12,7 +12,7 @@
                     .cq-top-ui-widgets,
                     .sc-toolbar-widget,
                     .stx-panel-control {
-                        transform: translate3d(248px, 0, 0);
+                        transform: translate3d(#{$POSITIONS_DRAWER_WIDTH}, 0, 0);
                     }
                     .cq-chart-controls {
                         transform: translate3d(130px, 0, 0) !important;
@@ -25,7 +25,7 @@
                     }
                     .cq-chart-control-left {
                         .cq-chart-controls {
-                            transform: translate3d(248px, 0, 0) !important;
+                            transform: translate3d(#{$POSITIONS_DRAWER_WIDTH}, 0, 0) !important;
                         }
                         .cq-bottom-ui-widgets {
                             .digits__container,
@@ -79,8 +79,9 @@ $FLOATING_HEADER_HEIGHT: 41px;
 .trade-container {
     position: relative;
     display: flex;
-    min-height: calc(100vh - 84px);
+    height: 100vh;
     overflow: hidden;
+    padding: 1.6rem 1.6rem 1.6rem 0;
 
     &__replay {
         direction: ltr;
@@ -92,7 +93,7 @@ $FLOATING_HEADER_HEIGHT: 41px;
 
         @include tablet-screen {
             padding: 2.4rem;
-            height: calc(100vh - 84px - #{$FLOATING_HEADER_HEIGHT + 12px});
+            height: calc(100vh - #{$FLOATING_HEADER_HEIGHT + 12px});
         }
 
         .contract-drawer {
@@ -666,7 +667,7 @@ $FLOATING_HEADER_HEIGHT: 41px;
 .sidebar {
     &__container {
         position: relative;
-        margin: 1.6rem;
+        margin: 0 0 0 1.6rem;
         width: $SIDEBAR_WIDTH;
         z-index: 5;
     }

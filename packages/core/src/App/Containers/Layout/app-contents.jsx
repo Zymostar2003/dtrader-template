@@ -136,11 +136,7 @@ const AppContents = observer(({ children }) => {
             {isMobile && children}
             {!isMobile && (
                 /* Calculate height of user screen and offset height of header and footer */
-                <ThemedScrollbars
-                    height={isDesktop ? 'calc(100vh - 84px)' : undefined}
-                    has_horizontal
-                    refSetter={child_ref}
-                >
+                <ThemedScrollbars height={isDesktop ? '100vh' : undefined} has_horizontal refSetter={child_ref}>
                     {children}
                 </ThemedScrollbars>
             )}
