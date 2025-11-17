@@ -74,7 +74,7 @@ const AccumulatorStats = observer(() => {
         return null;
     }
     return (
-        <div>
+        <React.Fragment>
             <div className='accumulators-stats-v2'>
                 <div className='accumulators-stats-v2__container'>
                     <button
@@ -118,7 +118,7 @@ const AccumulatorStats = observer(() => {
                 )}
                 {is_open_description && <AccumulatorStatsDescription onActionSheetClose={onActionSheetClose} />}
             </ActionSheet.Root>
-        </div>
+        </React.Fragment>
     );
 });
 

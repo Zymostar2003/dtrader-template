@@ -8,7 +8,6 @@ import { useStore } from '@deriv/stores';
 import { Localize } from '@deriv-com/translations';
 import { Tab } from '@deriv-com/quill-ui';
 
-import BottomNav from 'AppV2/Components/BottomNav';
 import OnboardingGuide from 'AppV2/Components/OnboardingGuide/GuideForPages';
 import { setPositionURLParams, TAB_NAME } from 'AppV2/Utils/positions-utils';
 import { useModulesStore } from 'Stores/useModulesStores';
@@ -66,11 +65,11 @@ const Positions = observer(() => {
     }, []);
 
     return (
-        <BottomNav>
-            <div className='positions-page'>
+        <div className='positions-page'>
+            <div className='positions-page-container'>
                 <Tab.Container
                     contentStyle='fill'
-                    className='positions-page__tabs'
+                    className='positions-page-container__tabs'
                     size='md'
                     selectedTabIndex={activeTab}
                     onChangeTab={onChangeTab}
@@ -80,7 +79,7 @@ const Positions = observer(() => {
                             <Tab.Trigger key={id}>{title}</Tab.Trigger>
                         ))}
                     </Tab.List>
-                    <Tab.Content className='positions-page__tabs-content'>
+                    <Tab.Content className='positions-page-container__tabs-content'>
                         {tabs.map(({ id, content }) => (
                             <Tab.Panel key={id}>{content}</Tab.Panel>
                         ))}
@@ -94,7 +93,7 @@ const Positions = observer(() => {
                     callback={() => setHasButtonsDemo(true)}
                 />
             )}
-        </BottomNav>
+        </div>
     );
 });
 

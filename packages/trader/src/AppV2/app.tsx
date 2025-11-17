@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { ReportsStoreProvider } from '@deriv/reports/src/Stores/useReportsStores';
-import { routes } from '@deriv/shared';
 import type { TCoreStores } from '@deriv/stores/types';
 import { NotificationsProvider, SnackbarProvider } from '@deriv-com/quill-ui';
 
@@ -13,7 +12,7 @@ import TraderProviders from '../trader-providers';
 
 import ServicesErrorSnackbar from './Components/ServicesErrorSnackbar';
 import Notifications from './Containers/Notifications';
-import Router from './Routes/router';
+import Layouts from './Layouts';
 
 import 'Sass/app.scss';
 
@@ -52,7 +51,7 @@ const App = ({ passthrough }: Apptypes) => {
                     <NotificationsProvider>
                         <SnackbarProvider>
                             <Notifications />
-                            <Router />
+                            <Layouts />
                             <ServicesErrorSnackbar />
                         </SnackbarProvider>
                     </NotificationsProvider>
