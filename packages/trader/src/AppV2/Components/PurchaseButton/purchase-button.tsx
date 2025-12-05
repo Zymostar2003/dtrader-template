@@ -95,12 +95,7 @@ const PurchaseButton = observer(() => {
         is_vanilla,
     };
     const has_no_button_content =
-        is_vanilla ||
-        is_vanilla_fx ||
-        is_turbos ||
-        is_high_low ||
-        is_touch ||
-        (is_accumulator && !has_open_accu_contract);
+        is_vanilla || is_vanilla_fx || is_turbos || is_multiplier || (is_accumulator && !has_open_accu_contract);
     const contract_types = getDisplayedContractTypes(trade_types, contract_type, trade_type_tab);
     const active_accu_contract = is_accumulator
         ? all_positions.find(({ contract_info, type }) => {
