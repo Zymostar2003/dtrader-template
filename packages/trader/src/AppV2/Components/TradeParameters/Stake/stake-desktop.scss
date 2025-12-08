@@ -29,12 +29,8 @@
         flex-shrink: 0;
         padding: 0.8rem 1.6rem 0;
 
-        .quill-segmented-control {
-            height: 2rem;
-
-            button {
-                height: 2rem;
-            }
+        .segmented-control-single button {
+            height: 3.2rem;
         }
     }
 
@@ -122,4 +118,10 @@
     flex-direction: column;
     gap: var(--core-spacing-1200);
     margin-top: auto;
+}
+
+.stake-input-desktop__save-button {
+    font-size: 1.6rem !important;
+    font-weight: bold !important;
+    border-radius: 100px !important;
 }
