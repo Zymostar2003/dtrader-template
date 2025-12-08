@@ -95,12 +95,7 @@ const PurchaseButton = observer(() => {
         is_vanilla,
     };
     const has_no_button_content =
-        is_vanilla ||
-        is_vanilla_fx ||
-        is_turbos ||
-        is_high_low ||
-        is_touch ||
-        (is_accumulator && !has_open_accu_contract);
+        is_vanilla || is_vanilla_fx || is_turbos || is_multiplier || (is_accumulator && !has_open_accu_contract);
     const contract_types = getDisplayedContractTypes(trade_types, contract_type, trade_type_tab);
     const active_accu_contract = is_accumulator
         ? all_positions.find(({ contract_info, type }) => {
@@ -161,13 +156,14 @@ const PurchaseButton = observer(() => {
     }, [is_purchase_enabled]);
 
     React.useEffect(() => {
+        const is_rise_fall = /^rise_fall/.test(contract_type.toLowerCase());
         const shouldSwitchToStake =
-            basis === BASIS_PAYOUT && basis_options.length > 1 && basis_options.includes(BASIS_STAKE);
+            basis === BASIS_PAYOUT && basis_options.length > 1 && basis_options.includes(BASIS_STAKE) && !is_rise_fall;
         if (shouldSwitchToStake) {
             onChange({ target: { value: BASIS_STAKE, name: BASIS_NAME } });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [basis, basis_options]);
+    }, [basis, basis_options, contract_type]);
 
     React.useEffect(() => {
         const is_animated =
