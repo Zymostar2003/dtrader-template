@@ -12,6 +12,7 @@ import AccumulatorStats from 'AppV2/Components/AccumulatorStats';
 import CurrentSpot from 'AppV2/Components/CurrentSpot';
 import OnboardingGuide from 'AppV2/Components/OnboardingGuide/GuideForPages';
 import PurchaseButton from 'AppV2/Components/PurchaseButton';
+import TradeErrorSnackbar from 'AppV2/Components/TradeErrorSnackbar';
 import { TradeParameters, TradeParametersContainer } from 'AppV2/Components/TradeParameters';
 // Commented out to use chart's native market selector instead
 // import MarketSelector from 'AppV2/Components/MarketSelector';
@@ -151,6 +152,10 @@ const TradeDesktop = observer(() => {
             ) : (
                 <Loading.DTraderV2 />
             )}
+            <TradeErrorSnackbar
+                error_fields={['stop_loss', 'take_profit', 'date_start', 'stake', 'amount']}
+                should_show_snackbar={should_show_snackbar}
+            />
         </div>
     );
 });

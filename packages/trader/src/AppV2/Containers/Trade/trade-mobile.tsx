@@ -18,6 +18,7 @@ import TradeErrorSnackbar from 'AppV2/Components/TradeErrorSnackbar';
 import { TradeParameters, TradeParametersContainer } from 'AppV2/Components/TradeParameters';
 import useContractsFor from 'AppV2/Hooks/useContractsFor';
 import useDefaultSymbol from 'AppV2/Hooks/useDefaultSymbol';
+import { useMobileBridge } from 'App/Hooks/useMobileBridge';
 import { getChartHeight, HEIGHT } from 'AppV2/Utils/layout-utils';
 import { getDisplayedContractTypes } from 'AppV2/Utils/trade-types-utils';
 import { isDigitTradeType } from 'Modules/Trading/Helpers/digits';
@@ -35,6 +36,7 @@ const Trade = observer(() => {
         common: { current_language, network_status },
         ui: { is_dark_mode_on },
     } = useStore();
+    const { isBridgeAvailable } = useMobileBridge();
     const { is_logged_in } = client;
     const {
         active_symbols,
@@ -164,15 +166,13 @@ const Trade = observer(() => {
                         </TradeParametersContainer>
                         {!is_market_closed && <PurchaseButton />}
                     </div>
-                    {!guide_dtrader_v2?.trade_page && is_logged_in && (
+                    {!guide_dtrader_v2?.trade_page && is_logged_in && !isBridgeAvailable() && (
                         <OnboardingGuide type='trade_page' is_dark_mode_on={is_dark_mode_on} />
                     )}
                 </React.Fragment>
             ) : (
                 <Loading.DTraderV2 />
             )}
-            <ServiceErrorSheet />
-            <ClosedMarketMessage />
             <TradeErrorSnackbar
                 error_fields={['stop_loss', 'take_profit', 'date_start', 'stake', 'amount']}
                 should_show_snackbar={should_show_snackbar}
