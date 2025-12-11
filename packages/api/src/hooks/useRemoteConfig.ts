@@ -5,9 +5,9 @@ import { ObjectUtils } from '@deriv-com/utils';
 import initData from '../remote_config.json';
 
 const remoteConfigQuery = async function () {
-    const REMOTE_CONFIG_URL = process.env.REMOTE_CONFIG_URL || '';
+    const REMOTE_CONFIG_URL = (typeof process !== 'undefined' && process.env?.REMOTE_CONFIG_URL) || '';
     if (REMOTE_CONFIG_URL === '') {
-        throw new Error('Remote Config URL is not set!');
+        return null;
     }
     const response = await fetch(REMOTE_CONFIG_URL);
     if (!response.ok) {
@@ -32,10 +32,12 @@ function useRemoteConfig(enabled = false) {
         if (enabled) {
             remoteConfigQuery()
                 .then(async res => {
-                    const resHash = await ObjectUtils.hashObject(res);
-                    const dataHash = await ObjectUtils.hashObject(data);
-                    if (resHash !== dataHash && isMounted.current) {
-                        setData(res);
+                    if (res) {
+                        const resHash = await ObjectUtils.hashObject(res);
+                        const dataHash = await ObjectUtils.hashObject(data);
+                        if (resHash !== dataHash && isMounted.current) {
+                            setData(res);
+                        }
                     }
                 })
                 .catch(error => {
