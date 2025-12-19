@@ -1,12 +1,19 @@
 .trade__current-spot {
-    position: relative;
-    border-radius: var(--core-borderRadius-400);
-    background-color: var(--semantic-color-slate-solid-surface-frame-low);
-    height: var(--core-size-2400);
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: absolute;
+    bottom: 3.2rem;
+    left: 50%;
+    z-index: 9;
+
+    @include mobile-screen {
+        position: relative;
+        border-radius: var(--core-borderRadius-400);
+        background-color: var(--semantic-color-slate-solid-surface-frame-low);
+        height: var(--core-size-2400);
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
     .current-spot {
         position: relative;
@@ -40,14 +47,24 @@
             }
         }
         &__last-digit {
-            width: var(--core-size-800);
-            height: var(--core-size-1400);
+            width: var(--core-size-1500);
+            height: var(--core-size-2600);
+
+            @include mobile-screen {
+                width: var(--core-size-800);
+                height: var(--core-size-1400);
+            }
 
             &-container {
                 overflow: hidden;
-                width: var(--core-size-800);
-                height: var(--core-size-1400);
+                width: var(--core-size-1500);
+                height: var(--core-size-2600);
                 position: relative;
+
+                @include mobile-screen {
+                    width: var(--core-size-800);
+                    height: var(--core-size-1400);
+                }
             }
             &-wrapper {
                 position: absolute;

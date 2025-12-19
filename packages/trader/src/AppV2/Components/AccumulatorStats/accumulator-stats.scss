@@ -43,6 +43,14 @@
 
     @include desktop-screen {
         margin-top: unset;
+        padding: unset;
+        position: absolute;
+        bottom: 3.2rem;
+        right: calc(50% - 22.8rem);
+        z-index: 9;
+        background-color: var(--color-surface-section);
+        border: 1px solid var(--color-surface-border);
+        border-radius: var(--core-borderRadius-400);
     }
 
     &__container {

@@ -119,6 +119,14 @@
                 }
             }
 
+            &-tooltip {
+                position: relative;
+
+                @include mobile-screen {
+                    position: unset;
+                }
+            }
+
             .smartcharts {
                 position: relative;
             }

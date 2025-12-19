@@ -13,6 +13,11 @@ jest.mock('@deriv/quill-icons', () => ({
     ...jest.requireActual('@deriv/quill-icons'),
 }));
 
+jest.mock('@deriv-com/ui', () => ({
+    ...jest.requireActual('@deriv-com/ui'),
+    useDevice: jest.fn(() => ({ isDesktop: false })),
+}));
+
 describe('Barrier Component', () => {
     let default_mock_store: ReturnType<typeof mockStore>;
 
