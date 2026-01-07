@@ -31,7 +31,7 @@
             padding-top: calc(100vh - 224px);
 
             &-text {
-                color: var(--component-textIcon-static-prominentDark) !important;
+                color: var(--component-textIcon-static-prominentDark);
             }
         }
     }
@@ -45,13 +45,13 @@
         justify-content: space-between;
 
         &__title {
-            color: var(--component-textIcon-inverse-prominent) !important;
+            color: var(--component-textIcon-inverse-prominent);
         }
     }
 
     &__content {
         margin-inline-end: var(--core-spacing-1200);
-        color: var(--component-textIcon-inverse-prominent) !important;
+        color: var(--component-textIcon-inverse-prominent);
     }
 
     &__close {

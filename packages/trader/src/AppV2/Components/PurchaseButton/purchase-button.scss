@@ -1,6 +1,4 @@
-// Increase specificity by targeting the button element directly
-.quill-button.purchase-button,
-button.purchase-button {
+.purchase-button {
     flex-direction: column-reverse;
     padding-block: var(--core-spacing-400);
     align-items: flex-end;
@@ -23,12 +21,6 @@ button.purchase-button {
         align-items: center;
     }
 
-    .quill-typography__color--prominent {
-        color: var(--component-button-label-color-sell-primary);
-    }
-}
-
-.purchase-button {
     &__information {
         &__wrapper {
             width: 100%;

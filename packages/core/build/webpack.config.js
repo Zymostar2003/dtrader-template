@@ -55,6 +55,20 @@ module.exports = function (env) {
                 automaticNameDelimiter: '~',
                 enforceSizeThreshold: 500000,
                 cacheGroups: {
+                    // Split vendor CSS into separate file
+                    // This ensures vendor CSS loads before app CSS in HTML
+                    vendorStyles: {
+                        test: module => {
+                            // Match CSS files from node_modules
+                            return (
+                                module.type === 'css/mini-extract' && /[\\/]node_modules[\\/]/.test(module.identifier())
+                            );
+                        },
+                        name: 'vendor',
+                        chunks: 'all',
+                        priority: 30,
+                        enforce: true,
+                    },
                     // Split out large, stable chart library for better caching
                     charts: {
                         test: /[\\/]node_modules[\\/]@deriv-com[\\/]smartcharts-champion[\\/]/,
