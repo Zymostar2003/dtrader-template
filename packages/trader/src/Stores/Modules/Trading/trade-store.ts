@@ -1378,19 +1378,6 @@ export default class TradeStore extends BaseStore {
      */
     updateStore(new_state: Partial<TradeStore>) {
         // Protective logic: Prevent clearing barriers for markets that need them
-        if (new_state.barrier_1 === '' && this.barrier_1 && this.barrier_1 !== '') {
-            // Check if current symbol/contract requires barriers
-            const requiresBarriers =
-                this.symbol &&
-                this.active_symbols &&
-                !isDigitTradeType(this.contract_type) &&
-                !isAccumulatorContract(this.contract_type);
-
-            if (requiresBarriers) {
-                // Don't clear the barrier - remove it from new_state
-                delete new_state.barrier_1;
-            }
-        }
 
         Object.keys(cloneObject(new_state) || {}).forEach(key => {
             if (key === 'root_store' || ['validation_rules', 'validation_errors', 'currency'].indexOf(key) > -1) return;
