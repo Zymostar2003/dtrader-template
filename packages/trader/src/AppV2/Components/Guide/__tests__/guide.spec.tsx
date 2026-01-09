@@ -1,13 +1,11 @@
 import React from 'react';
-import Loadable from 'react-loadable';
 
 import { TRADE_TYPES } from '@deriv/shared';
 import { mockStore, StoreProvider } from '@deriv/stores';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { getTerm } from 'AppV2/Utils/contract-description-utils';
-import { CONTRACT_LIST } from 'AppV2/Utils/trade-types-utils';
+import { AVAILABLE_CONTRACTS, CONTRACT_LIST } from 'AppV2/Utils/trade-types-utils';
 
 import TraderProviders from '../../../../trader-providers';
 import Guide from '../guide';
@@ -153,13 +151,6 @@ jest.mock('AppV2/Hooks/useGuideContractTypes', () => ({
     })),
 }));
 
-jest.mock('AppV2/Hooks/useAvailableContracts', () => ({
-    __esModule: true,
-    default: jest.fn(() => mockAvailableContracts),
-}));
-
-Loadable.preloadAll();
-
 describe('Guide', () => {
     let default_mock_store: ReturnType<typeof mockStore>;
 
@@ -218,7 +209,10 @@ describe('Guide', () => {
 
         await userEvent.click(screen.getByText(/How to trade Rise\/Fall\?/));
         await userEvent.click(screen.getByText(CONTRACT_LIST.ACCUMULATORS));
-        await userEvent.click(screen.getByRole('button', { name: getTerm().GROWTH_RATE.toLowerCase() }));
+
+        // Wait for the AccumulatorsTradeDescription component to load and find the text with "growth rate"
+        const growth_rate_text = await screen.findByText(/growth rate/i, {}, { timeout: 3000 });
+        await userEvent.click(growth_rate_text);
 
         expect(await screen.findByText(term_definition)).toBeInTheDocument();
     });

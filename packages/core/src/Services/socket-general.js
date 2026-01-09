@@ -19,6 +19,16 @@ const BinarySocketGeneral = (() => {
         common_store.setIsSocketOpened(false);
     };
 
+    const onConnectionError = () => {
+        localStorage.removeItem('active_loginid');
+        localStorage.removeItem('account_id');
+        localStorage.removeItem('account_type');
+
+        common_store.setError(true, {
+            message: localize('Connection failed. Please refresh this page to continue.'),
+        });
+    };
+
     const onOpen = is_ready => {
         responseTimeoutErrorTimer = setTimeout(() => {
             const expectedResponseTypes = WS?.get?.()?.expect_response_types || {};
@@ -48,9 +58,20 @@ const BinarySocketGeneral = (() => {
 
         switch (response.msg_type) {
             case 'balance':
-                // First balance response confirms authorization
-                if (!client_store.is_authorize && response.balance && response.balance.loginid) {
-                    authorizeAccount(response);
+                // Always process authorization on balance response
+                // This handles both initial connection and reconnection
+                if (response.balance && response.balance.loginid) {
+                    const loginid_changed = response.balance.loginid !== client_store.loginid;
+                    const not_yet_authorized = !client_store.is_authorize;
+
+                    // Only call authorizeAccount when needed
+                    if (loginid_changed || not_yet_authorized) {
+                        // Clear contract markers when account changes to prevent showing previous account's contracts
+                        if (loginid_changed) {
+                            client_store.root_store.contract_trade.clearContracts();
+                        }
+                        authorizeAccount(response);
+                    }
                 }
                 break;
             case 'transaction':
@@ -110,6 +131,7 @@ const BinarySocketGeneral = (() => {
             onDisconnect,
             onOpen,
             onMessage,
+            onConnectionError,
         };
     };
 
@@ -139,9 +161,9 @@ const BinarySocketGeneral = (() => {
         }
 
         client_store.responseAuthorize(authorize_data);
+        client_store.setIsAuthorize(true); // Set BEFORE anything that depends on it
         subscribeBalance(); // Continue balance subscription
-        client_store.setIsAuthorize(true);
-        BinarySocket.sendBuffered();
+        BinarySocket.sendBuffered(); // Now buffered calls see is_authorize = true
     };
 
     return {

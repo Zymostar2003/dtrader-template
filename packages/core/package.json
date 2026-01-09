@@ -91,7 +91,7 @@
     "dependencies": {
         "@babel/polyfill": "^7.12.1 ",
         "@datadog/browser-rum": "^5.11.0",
-        "@deriv-com/analytics": "1.32.1",
+        "@deriv-com/analytics": "1.33.0",
         "@deriv-com/quill-tokens": "2.0.4",
         "@deriv-com/quill-ui": "1.24.6",
         "@deriv-com/translations": "1.4.0",
@@ -133,11 +133,10 @@
         "react-content-loader": "^6.2.0",
         "react-dom": "^18.2.0",
         "react-i18next": "^11.11.0",
-        "react-loadable": "^5.5.0",
         "react-router": "^5.2.0",
         "react-router-dom": "^5.2.0",
         "react-tiny-popover": "^7.0.1",
-        "react-transition-group": "4.4.2",
+        "react-transition-group": "4.4.5",
         "react-window": "^1.8.5",
         "usehooks-ts": "^2.7.0"
     }

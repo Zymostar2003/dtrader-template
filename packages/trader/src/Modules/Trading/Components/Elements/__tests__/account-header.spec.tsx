@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { APIProvider } from '@deriv/api';
 import { redirectToLogin, trackAnalyticsEvent } from '@deriv/shared';
 import { mockStore, StoreProvider } from '@deriv/stores';
 import { render, screen } from '@testing-library/react';
@@ -12,10 +13,69 @@ jest.mock('@deriv/shared', () => ({
     getCurrencyDisplayCode: jest.fn((currency: string) => currency),
     redirectToLogin: jest.fn(),
     trackAnalyticsEvent: jest.fn(),
+    getApiCoreBaseUrl: jest.fn(() => 'https://api.deriv.com'),
+    addComma: jest.fn((num: number | string, decimals?: number) => {
+        const numValue = typeof num === 'string' ? parseFloat(num.replace(/,/g, '')) : num;
+        if (isNaN(numValue)) return '0.00';
+        const formatted = numValue.toFixed(decimals || 2);
+        // Add commas for thousands
+        return formatted.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }),
 }));
+
+const mockUseDerivativesAccount = jest.fn(() => ({
+    data: {
+        data: [
+            { account_id: 'CR123', account_type: 'real', balance: '10000.00', currency: 'USD' },
+            { account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' },
+        ],
+    },
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+}));
+
+// Mock useMobileBridge hook
+const mockSendBridgeEvent = jest.fn(async (_event, fallback) => {
+    // Execute fallback to simulate browser behavior
+    if (fallback) await fallback();
+    return true;
+});
+
+jest.mock('@deriv/api', () => ({
+    ...jest.requireActual('@deriv/api'),
+    useDerivativesAccount: () => mockUseDerivativesAccount(),
+    useMobileBridge: () => ({
+        sendBridgeEvent: mockSendBridgeEvent,
+        isBridgeAvailable: false,
+    }),
+}));
+
+jest.mock('@deriv-com/ui', () => ({
+    useDevice: jest.fn(() => ({ isMobile: false })),
+}));
+
+jest.mock('@deriv/quill-icons', () => ({
+    LegacyChevronDown1pxIcon: () => <div data-testid='chevron-icon'>Chevron</div>,
+}));
+
+jest.mock('@deriv-com/quill-ui', () => ({
+    ActionSheet: {
+        Root: ({ children }: any) => <div data-testid='action-sheet-root'>{children}</div>,
+        Portal: ({ children }: any) => <div data-testid='action-sheet-portal'>{children}</div>,
+    },
+}));
+
+jest.mock('@deriv/core/src/App/Components/Layout/Header/account-switcher', () => {
+    return jest.fn(() => <div data-testid='account-switcher'>Account Switcher</div>);
+});
 
 jest.mock('@deriv/core/src/App/Components/Layout/Header/account-info-icon', () => {
     return jest.fn(() => <div data-testid='account-info-icon'>Icon</div>);
+});
+
+jest.mock('@deriv/core/src/App/Containers/Modals/TryRealModal', () => {
+    return jest.fn(() => <div data-testid='try-real-modal'>Try Real Modal</div>);
 });
 
 describe('AccountHeader', () => {
@@ -31,23 +91,37 @@ describe('AccountHeader', () => {
 
     const renderComponent = (store = default_mock_store, props = {}) => {
         return render(
-            <StoreProvider store={store}>
-                <AccountHeader {...props} />
-            </StoreProvider>
+            <APIProvider>
+                <StoreProvider store={store}>
+                    <AccountHeader {...props} />
+                </StoreProvider>
+            </APIProvider>
         );
     };
 
     beforeEach(() => {
         jest.clearAllMocks();
+        mockSendBridgeEvent.mockClear();
+        // Reset to default mock with both account types
+        mockUseDerivativesAccount.mockReturnValue({
+            data: {
+                data: [
+                    { account_id: 'CR123', account_type: 'real', balance: '10000.00', currency: 'USD' },
+                    { account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' },
+                ],
+            },
+            isLoading: false,
+            error: null,
+            refetch: jest.fn(),
+        });
     });
 
     describe('Logged in state', () => {
         it('should render account info with balance for logged in real account', () => {
             renderComponent();
 
-            expect(screen.getByText('Real')).toBeInTheDocument();
+            expect(screen.getByText('Real account')).toBeInTheDocument();
             expect(screen.getByText('10,000.00 USD')).toBeInTheDocument();
-            expect(screen.getByTestId('account-info-icon')).toBeInTheDocument();
         });
 
         it('should render account info with balance for logged in demo account', () => {
@@ -63,7 +137,7 @@ describe('AccountHeader', () => {
 
             renderComponent(demo_store);
 
-            expect(screen.getByText('Demo')).toBeInTheDocument();
+            expect(screen.getByText('Demo account')).toBeInTheDocument();
             expect(screen.getByText('5,000.00 USD')).toBeInTheDocument();
         });
 
@@ -92,7 +166,7 @@ describe('AccountHeader', () => {
             expect(transferButton).toHaveClass('account-header__transfer');
         });
 
-        it('should render manage button for logged in demo account users', () => {
+        it('should render transfer button for demo account users when they have both account types', () => {
             const demo_store = mockStore({
                 client: {
                     balance: '5,000.00',
@@ -105,10 +179,39 @@ describe('AccountHeader', () => {
 
             renderComponent(demo_store);
 
-            const manageButton = screen.getByRole('button', { name: /manage/i });
-            expect(manageButton).toBeInTheDocument();
-            expect(manageButton).toHaveAttribute('type', 'button');
-            expect(manageButton).toHaveClass('account-header__transfer');
+            const transferButton = screen.getByRole('button', { name: /transfer/i });
+            expect(transferButton).toBeInTheDocument();
+            expect(transferButton).toHaveAttribute('type', 'button');
+            expect(transferButton).toHaveClass('account-header__transfer');
+        });
+
+        it('should render "Try real" button for demo-only account users', () => {
+            // Mock useDerivativesAccount to return only demo accounts
+            mockUseDerivativesAccount.mockReturnValue({
+                data: {
+                    data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+                },
+                isLoading: false,
+                error: null,
+                refetch: jest.fn(),
+            });
+
+            const demo_store = mockStore({
+                client: {
+                    balance: '5,000.00',
+                    currency: 'USD',
+                    is_logged_in: true,
+                    is_virtual: true,
+                    logout: jest.fn(),
+                },
+            });
+
+            renderComponent(demo_store);
+
+            const tryRealButton = screen.getByRole('button', { name: /try real/i });
+            expect(tryRealButton).toBeInTheDocument();
+            expect(tryRealButton).toHaveAttribute('type', 'button');
+            expect(tryRealButton).toHaveClass('account-header__transfer');
         });
         describe('Invalid balance handling', () => {
             it('should display dash with currency when balance is NaN', () => {
@@ -297,9 +400,8 @@ describe('AccountHeader', () => {
 
             renderComponent(logged_out_store);
 
-            expect(screen.queryByTestId('account-info-icon')).not.toBeInTheDocument();
-            expect(screen.queryByText('Real')).not.toBeInTheDocument();
-            expect(screen.queryByText('Demo')).not.toBeInTheDocument();
+            expect(screen.queryByText('Real account')).not.toBeInTheDocument();
+            expect(screen.queryByText('Demo account')).not.toBeInTheDocument();
         });
 
         it('should render login button for logged out users', () => {
@@ -350,14 +452,14 @@ describe('AccountHeader', () => {
                 is_virtual: true,
             });
 
-            expect(screen.getByText('Demo')).toBeInTheDocument();
+            expect(screen.getByText('Demo account')).toBeInTheDocument();
             expect(screen.getByText('5,000.00 EUR')).toBeInTheDocument();
         });
 
         it('should fall back to store values when props are not provided', () => {
             renderComponent();
 
-            expect(screen.getByText('Real')).toBeInTheDocument();
+            expect(screen.getByText('Real account')).toBeInTheDocument();
             expect(screen.getByText('10,000.00 USD')).toBeInTheDocument();
         });
 
@@ -368,7 +470,7 @@ describe('AccountHeader', () => {
             });
 
             expect(screen.getByText('2,500.00 USD')).toBeInTheDocument();
-            expect(screen.getByText('Real')).toBeInTheDocument();
+            expect(screen.getByText('Real account')).toBeInTheDocument();
         });
     });
 
@@ -380,7 +482,17 @@ describe('AccountHeader', () => {
             expect(transferButton).toHaveAttribute('aria-label', 'Transfer');
         });
 
-        it('should have proper aria-label for manage button with correct value for demo account', () => {
+        it('should have proper aria-label for "Try real" button for demo-only accounts', () => {
+            // Mock useDerivativesAccount to return only demo accounts
+            mockUseDerivativesAccount.mockReturnValue({
+                data: {
+                    data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+                },
+                isLoading: false,
+                error: null,
+                refetch: jest.fn(),
+            });
+
             const demo_store = mockStore({
                 client: {
                     balance: '5,000.00',
@@ -393,8 +505,8 @@ describe('AccountHeader', () => {
 
             renderComponent(demo_store);
 
-            const manageButton = screen.getByRole('button', { name: /manage/i });
-            expect(manageButton).toHaveAttribute('aria-label', 'Manage');
+            const tryRealButton = screen.getByRole('button', { name: /try real/i });
+            expect(tryRealButton).toHaveAttribute('aria-label', 'Try real');
         });
 
         it('should have proper aria-label for login button with correct value', () => {
@@ -450,7 +562,17 @@ describe('AccountHeader', () => {
                 });
             });
 
-            it('should track analytics event when manage button is clicked for demo account', async () => {
+            it('should track analytics event when "Try real" button is clicked for demo-only account', async () => {
+                // Mock useDerivativesAccount to return only demo accounts
+                mockUseDerivativesAccount.mockReturnValue({
+                    data: {
+                        data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+                    },
+                    isLoading: false,
+                    error: null,
+                    refetch: jest.fn(),
+                });
+
                 const demo_store = mockStore({
                     client: {
                         balance: '5,000.00',
@@ -459,16 +581,19 @@ describe('AccountHeader', () => {
                         is_virtual: true,
                         logout: jest.fn(),
                     },
+                    ui: {
+                        toggleTryRealModal: jest.fn(),
+                    },
                 });
 
                 renderComponent(demo_store);
 
-                const manageButton = screen.getByRole('button', { name: /manage/i });
-                await userEvent.click(manageButton);
+                const tryRealButton = screen.getByRole('button', { name: /try real/i });
+                await userEvent.click(tryRealButton);
 
                 expect(trackAnalyticsEvent).toHaveBeenCalledWith('ce_trade_types_form_v2', {
                     action: 'click',
-                    button_type: 'manage',
+                    button_type: 'try_real',
                 });
             });
 
@@ -497,21 +622,59 @@ describe('AccountHeader', () => {
                 expect(callOrder).toEqual(['analytics', 'navigation']);
             });
 
-            it('should call trackAnalyticsEvent before navigation for manage button', async () => {
+            it('should call trackAnalyticsEvent before opening modal for "Try real" button', async () => {
+                // Mock useDerivativesAccount to return only demo accounts
+                mockUseDerivativesAccount.mockReturnValue({
+                    data: {
+                        data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+                    },
+                    isLoading: false,
+                    error: null,
+                    refetch: jest.fn(),
+                });
+
                 const callOrder: string[] = [];
+                const toggleTryRealModal = jest.fn(() => {
+                    callOrder.push('modal');
+                });
 
                 (trackAnalyticsEvent as jest.Mock).mockImplementation(() => {
                     callOrder.push('analytics');
                 });
 
-                // Mock window.location.href setter
-                delete (window as any).location;
-                window.location = { href: '' } as any;
-                Object.defineProperty(window.location, 'href', {
-                    set: jest.fn(() => {
-                        callOrder.push('navigation');
-                    }),
-                    get: jest.fn(),
+                const demo_store = mockStore({
+                    client: {
+                        balance: '5,000.00',
+                        currency: 'USD',
+                        is_logged_in: true,
+                        is_virtual: true,
+                        logout: jest.fn(),
+                    },
+                    ui: {
+                        toggleTryRealModal,
+                    },
+                });
+
+                renderComponent(demo_store);
+
+                const tryRealButton = screen.getByRole('button', { name: /try real/i });
+                await userEvent.click(tryRealButton);
+
+                expect(callOrder).toEqual(['analytics', 'modal']);
+                expect(toggleTryRealModal).toHaveBeenCalledWith(true);
+            });
+        });
+
+        describe('Demo-only account behavior', () => {
+            it('should hide chevron icon for demo-only accounts', () => {
+                // Mock useDerivativesAccount to return only demo accounts
+                mockUseDerivativesAccount.mockReturnValue({
+                    data: {
+                        data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+                    },
+                    isLoading: false,
+                    error: null,
+                    refetch: jest.fn(),
                 });
 
                 const demo_store = mockStore({
@@ -526,15 +689,112 @@ describe('AccountHeader', () => {
 
                 renderComponent(demo_store);
 
-                const manageButton = screen.getByRole('button', { name: /manage/i });
-                await userEvent.click(manageButton);
+                expect(screen.queryByTestId('chevron-icon')).not.toBeInTheDocument();
+            });
 
-                expect(callOrder).toEqual(['analytics', 'navigation']);
+            it('should show chevron icon when user has multiple account types', () => {
+                renderComponent();
+
+                expect(screen.getByTestId('chevron-icon')).toBeInTheDocument();
+            });
+
+            it('should not render AccountSwitcher for demo-only accounts', () => {
+                // Mock useDerivativesAccount to return only demo accounts
+                mockUseDerivativesAccount.mockReturnValue({
+                    data: {
+                        data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+                    },
+                    isLoading: false,
+                    error: null,
+                    refetch: jest.fn(),
+                });
+
+                const demo_store = mockStore({
+                    client: {
+                        balance: '5,000.00',
+                        currency: 'USD',
+                        is_logged_in: true,
+                        is_virtual: true,
+                        logout: jest.fn(),
+                    },
+                });
+
+                renderComponent(demo_store);
+
+                expect(screen.queryByTestId('account-switcher')).not.toBeInTheDocument();
+            });
+
+            it('should render AccountSwitcher when user has multiple account types', () => {
+                renderComponent();
+
+                expect(screen.getByTestId('account-switcher')).toBeInTheDocument();
             });
         });
 
         it('should have display name', () => {
             expect(AccountHeader.displayName).toBe('AccountHeader');
+        });
+
+        describe('Bridge events', () => {
+            it('should call sendBridgeEvent with trading:transfer event when transfer button is clicked', async () => {
+                renderComponent();
+
+                const transferButton = screen.getByRole('button', { name: /transfer/i });
+                await userEvent.click(transferButton);
+
+                expect(mockSendBridgeEvent).toHaveBeenCalledWith('trading:transfer', expect.any(Function));
+            });
+
+            it('should execute fallback (redirect) when bridge is not available', async () => {
+                // Mock window.location.href
+                delete (window as any).location;
+                (window as any).location = { href: '' };
+
+                renderComponent();
+
+                const transferButton = screen.getByRole('button', { name: /transfer/i });
+                await userEvent.click(transferButton);
+
+                // Since mockSendBridgeEvent executes the fallback, window.location should be set
+                expect(window.location.href).toContain('/transfer');
+                expect(window.location.href).toContain('curr=USD');
+            });
+
+            it('should not call sendBridgeEvent for Try real button (should open modal instead)', async () => {
+                // Mock useDerivativesAccount to return only demo accounts
+                mockUseDerivativesAccount.mockReturnValue({
+                    data: {
+                        data: [{ account_id: 'VRTC456', account_type: 'demo', balance: '5000.00', currency: 'USD' }],
+                    },
+                    isLoading: false,
+                    error: null,
+                    refetch: jest.fn(),
+                });
+
+                const toggleTryRealModal = jest.fn();
+
+                const demo_store = mockStore({
+                    client: {
+                        balance: '5,000.00',
+                        currency: 'USD',
+                        is_logged_in: true,
+                        is_virtual: true,
+                        logout: jest.fn(),
+                    },
+                    ui: {
+                        toggleTryRealModal,
+                    },
+                });
+
+                renderComponent(demo_store);
+
+                const tryRealButton = screen.getByRole('button', { name: /try real/i });
+                await userEvent.click(tryRealButton);
+
+                // Should open modal, not send bridge event
+                expect(toggleTryRealModal).toHaveBeenCalledWith(true);
+                expect(mockSendBridgeEvent).not.toHaveBeenCalled();
+            });
         });
     });
 });

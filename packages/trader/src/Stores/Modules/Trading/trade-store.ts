@@ -375,6 +375,7 @@ export default class TradeStore extends BaseStore {
     is_initial_barrier_applied = false;
     is_digits_widget_active = false;
     should_skip_prepost_lifecycle = false;
+    reconnectHandler?: () => Promise<void>;
     constructor({ root_store }: { root_store: TRootStore }) {
         const local_storage_properties = [
             'amount',
@@ -806,26 +807,28 @@ export default class TradeStore extends BaseStore {
         }
         this.should_show_active_symbols_loading = should_show_loading;
 
-        await this.setActiveSymbols();
+        try {
+            await this.setActiveSymbols();
 
-        const { symbol, showModal } = getTradeURLParams({ active_symbols: this.active_symbols });
-        if (showModal && should_show_loading && !this.root_store.client.is_logging_in) {
-            this.root_store.ui.toggleUrlUnavailableModal(true);
+            const { symbol, showModal } = getTradeURLParams({ active_symbols: this.active_symbols });
+            if (showModal && should_show_loading && !this.root_store.client.is_logging_in) {
+                this.root_store.ui.toggleUrlUnavailableModal(true);
+            }
+            const hasSymbolChanged = symbol && symbol !== this.symbol;
+            if (hasSymbolChanged) this.symbol = symbol;
+            if (should_set_default_symbol && !symbol) await this.setDefaultSymbol();
+            setTradeURLParams({ symbol: hasSymbolChanged ? symbol : this.symbol });
+
+            const r = await WS.storage.contractsFor(this.symbol);
+            if (['InvalidSymbol', 'InputValidationFailed'].includes(r.error?.code)) {
+                const symbol_to_update = await pickDefaultSymbol(this.active_symbols);
+                await this.processNewValuesAsync({ symbol: symbol_to_update });
+            }
+        } finally {
+            runInAction(() => {
+                this.should_show_active_symbols_loading = false;
+            });
         }
-        const hasSymbolChanged = symbol && symbol !== this.symbol;
-        if (hasSymbolChanged) this.symbol = symbol;
-        if (should_set_default_symbol && !symbol) await this.setDefaultSymbol();
-        setTradeURLParams({ symbol: hasSymbolChanged ? symbol : this.symbol });
-
-        const r = await WS.storage.contractsFor(this.symbol);
-        if (['InvalidSymbol', 'InputValidationFailed'].includes(r.error?.code)) {
-            const symbol_to_update = await pickDefaultSymbol(this.active_symbols);
-            await this.processNewValuesAsync({ symbol: symbol_to_update });
-        }
-
-        runInAction(() => {
-            this.should_show_active_symbols_loading = false;
-        });
     }
 
     async setDefaultSymbol() {
@@ -840,7 +843,7 @@ export default class TradeStore extends BaseStore {
     async setActiveSymbols() {
         const showError = this.root_store.common.showError;
 
-        const { active_symbols, error } = await WS.authorized.activeSymbols();
+        const { active_symbols, error } = await WS.activeSymbols();
 
         if (error) {
             showError({ message: localize('Trading is unavailable at this time.') });
@@ -1375,19 +1378,6 @@ export default class TradeStore extends BaseStore {
      */
     updateStore(new_state: Partial<TradeStore>) {
         // Protective logic: Prevent clearing barriers for markets that need them
-        if (new_state.barrier_1 === '' && this.barrier_1 && this.barrier_1 !== '') {
-            // Check if current symbol/contract requires barriers
-            const requiresBarriers =
-                this.symbol &&
-                this.active_symbols &&
-                !isDigitTradeType(this.contract_type) &&
-                !isAccumulatorContract(this.contract_type);
-
-            if (requiresBarriers) {
-                // Don't clear the barrier - remove it from new_state
-                delete new_state.barrier_1;
-            }
-        }
 
         Object.keys(cloneObject(new_state) || {}).forEach(key => {
             if (key === 'root_store' || ['validation_rules', 'validation_errors', 'currency'].indexOf(key) > -1) return;
@@ -2005,6 +1995,36 @@ export default class TradeStore extends BaseStore {
         this.onLogout(this.logoutListener);
         this.onClientInit(this.clientInitListener);
         this.onNetworkStatusChange(this.networkStatusChangeListener);
+
+        // Add reconnection handler - onReconnect is only called when account_id exists
+        // Store the handler so we can remove it later
+        this.reconnectHandler = async () => {
+            if (!this.is_trade_component_mounted) {
+                return;
+            }
+
+            try {
+                // Clear existing data
+                this.refresh();
+
+                // Reload active symbols (without loading indicator to avoid UI flicker)
+                await this.loadActiveSymbols(false, false);
+
+                // Reload contract types for current symbol
+                await this.setContractTypes();
+
+                // Request new proposals
+                this.debouncedProposal();
+            } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error('Error during reconnection:', error);
+                // Still attempt to get proposals with existing data as fallback
+                this.debouncedProposal();
+            }
+        };
+
+        WS.setOnReconnect(this.reconnectHandler);
+
         this.setChartModeFromURL();
         this.setChartStatus(true);
         runInAction(async () => {
@@ -2063,6 +2083,9 @@ export default class TradeStore extends BaseStore {
         this.disposeClientInit();
         this.disposeNetworkStatusChange();
         this.disposeThemeChange();
+        if (this.reconnectHandler) {
+            WS.removeOnReconnect(this.reconnectHandler);
+        }
         this.is_trade_component_mounted = false;
         this.clearV2ParamsInitialValues();
         // TODO: Find a more elegant solution to unmount contract-trade-store

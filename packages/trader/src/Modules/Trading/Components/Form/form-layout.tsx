@@ -1,9 +1,11 @@
-import React from 'react';
-import Loadable from 'react-loadable';
+import React, { Suspense } from 'react';
 
 import { observer, useStore } from '@deriv/stores';
 
 import { useTraderStore } from 'Stores/useTraderStores.js';
+
+// Move React.lazy outside the component to prevent potential race conditions
+const ScreenLarge = React.lazy(() => import(/* webpackChunkName: "screen-large" */ './screen-large'));
 
 type TFormLayout = {
     is_market_closed: ReturnType<typeof useTraderStore>['is_market_closed'];
@@ -15,24 +17,15 @@ const FormLayout = observer(({ is_market_closed, is_trade_enabled }: TFormLayout
     const { current_language } = common;
     const { is_logging_in } = client;
 
-    const Screen = React.useMemo(() => {
-        return Loadable({
-            loader: () => import(/* webpackChunkName: "screen-large" */ './screen-large'),
-            loading: () => null,
-            render(loaded, props) {
-                const Component = loaded.default;
-                return <Component {...props} />;
-            },
-        });
-    }, []);
-
     return (
         <React.Fragment key={current_language}>
-            <Screen
-                is_trade_enabled={is_trade_enabled}
-                is_market_closed={is_market_closed}
-                is_single_logging_in={is_logging_in}
-            />
+            <Suspense fallback={null}>
+                <ScreenLarge
+                    is_trade_enabled={is_trade_enabled}
+                    is_market_closed={is_market_closed}
+                    is_single_logging_in={is_logging_in}
+                />
+            </Suspense>
         </React.Fragment>
     );
 });

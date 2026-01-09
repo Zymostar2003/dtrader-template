@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 
 import { mapErrorMessage } from '@deriv/shared';
-import { Localize } from '@deriv-com/translations';
 import { ActionSheet, TextField, useSnackbar } from '@deriv-com/quill-ui';
+import { Localize } from '@deriv-com/translations';
 
 import Carousel from 'AppV2/Components/Carousel';
 import CarouselHeader from 'AppV2/Components/Carousel/carousel-header';
@@ -67,16 +67,19 @@ const Barrier = observer(({ is_minimized }: TTradeParametersProps) => {
         }
     }, [is_open]);
 
-    const barrier_carousel_pages = [
-        {
-            id: 1,
-            component: <BarrierInput isDays={isDays} onClose={onClose} />,
-        },
-        {
-            id: 2,
-            component: <BarrierDescription isDays={isDays} />,
-        },
-    ];
+    const barrier_carousel_pages = useMemo(
+        () => [
+            {
+                id: 1,
+                component: <BarrierInput isDays={isDays} onClose={onClose} is_open={is_open} />,
+            },
+            {
+                id: 2,
+                component: <BarrierDescription isDays={isDays} />,
+            },
+        ],
+        [isDays, onClose, is_open]
+    );
 
     if (isDesktop) {
         return <BarrierDesktop is_minimized={is_minimized} />;

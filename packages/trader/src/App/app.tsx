@@ -1,5 +1,4 @@
 import React from 'react';
-import Loadable from 'react-loadable';
 
 import type { TCoreStores } from '@deriv/stores/types';
 
@@ -22,10 +21,15 @@ type Apptypes = {
     };
 };
 
-const TradeModals = Loadable({
-    loader: () => import(/* webpackChunkName: "trade-modals", webpackPrefetch: true */ './Containers/Modals'),
-    loading: () => null,
-});
+const TradeModalsLazy = React.lazy(
+    () => import(/* webpackChunkName: "trade-modals", webpackPrefetch: true */ './Containers/Modals')
+);
+
+const TradeModals = () => (
+    <React.Suspense fallback={null}>
+        <TradeModalsLazy />
+    </React.Suspense>
+);
 
 const App = ({ passthrough }: Apptypes) => {
     const root_store = initStore(passthrough.root_store, passthrough.WS);

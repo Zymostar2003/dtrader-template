@@ -11,7 +11,6 @@ import { useTraderStore } from 'Stores/useTraderStores';
 
 import AccumulatorsChartElements from '../../SmartChart/Components/Markers/accumulators-chart-elements';
 import ToolbarWidgets from '../../SmartChart/Components/toolbar-widgets';
-import { ChartIntroGuide } from '_common/components/ChartIntroGuide';
 
 import { ChartBottomWidgets } from './chart-widgets';
 import type { TBottomWidgetsParams } from './trade';
@@ -26,9 +25,8 @@ type TTradeChartProps = {
 
 const TradeChart = observer((props: TTradeChartProps) => {
     const { has_barrier, is_accumulator, topWidgets } = props;
-    const { ui, common, contract_trade, portfolio, client } = useStore();
+    const { ui, common, contract_trade, portfolio } = useStore();
     const { isMobile } = useDevice();
-    const { is_logged_in } = client;
     const {
         accumulator_barriers_data,
         accumulator_contract_barriers_data,
@@ -143,8 +141,9 @@ const TradeChart = observer((props: TTradeChartProps) => {
 
     return (
         <>
-            {!isMobile && <ChartIntroGuide is_logged_in={is_logged_in} />}
             <SmartChart
+                // Force remount when toggling digit stats to properly initialize chart state
+                key={show_digits_stats ? symbol : 'trade-chart'}
                 drawingToolFloatingMenuPosition={
                     isMobile
                         ? CHART_CONSTANTS.MOBILE_DRAWING_TOOL_POSITION

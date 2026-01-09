@@ -1,5 +1,4 @@
 import React from 'react';
-import Loadable from 'react-loadable';
 
 import { toMoment } from '@deriv/shared';
 import { mockStore, StoreProvider } from '@deriv/stores';
@@ -32,8 +31,6 @@ jest.mock('@deriv-com/ui', () => ({
         isTablet: false,
     })),
 }));
-
-Loadable.preloadAll();
 
 describe('<CompositeCalendar />', () => {
     const mockCompositeCalendar = () => (

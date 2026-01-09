@@ -1,13 +1,10 @@
 import React from 'react';
-import Loadable from 'react-loadable';
 
 import { mockStore } from '@deriv/stores';
 import { render } from '@testing-library/react';
 
 import TraderProviders from '../../../trader-providers';
 import TradeSettingsExtensions from '../trade-settings-extensions';
-
-Loadable.preloadAll();
 
 describe('<TradeSettingsExtensions/>', () => {
     const default_mock_store = {

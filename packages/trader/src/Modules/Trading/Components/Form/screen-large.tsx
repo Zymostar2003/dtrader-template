@@ -22,7 +22,9 @@ const ScreenLarge = ({ is_market_closed = false, is_trade_enabled, is_single_log
         })}
     >
         {!is_trade_enabled || is_single_logging_in ? (
-            <TradeParamsLoader speed={2} />
+            <div className='trade-params-v1__items-content'>
+                <TradeParamsLoader speed={2} />
+            </div>
         ) : (
             <React.Fragment>
                 <AccountHeader />
