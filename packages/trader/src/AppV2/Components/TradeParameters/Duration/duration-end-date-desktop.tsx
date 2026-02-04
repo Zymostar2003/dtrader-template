@@ -18,7 +18,7 @@ interface DurationEndDateDesktopProps {
 
 const DurationEndDateDesktop: React.FC<DurationEndDateDesktopProps> = observer(({ onClose }) => {
     const { localize } = useTranslations();
-    const { expiry_date, duration_unit, duration, duration_min_max, symbol, onChangeMultiple } = useTraderStore();
+    const { expiry_date, duration_unit, duration, symbol, onChangeMultiple } = useTraderStore();
     const isMounted = useIsMounted();
 
     // Calculate initial date based on duration_unit and duration
@@ -122,11 +122,10 @@ const DurationEndDateDesktop: React.FC<DurationEndDateDesktopProps> = observer((
     }, []);
 
     const getMaxDate = useCallback(() => {
-        // Use duration_min_max if available, otherwise default to 365 days
-        const maxDays = duration_min_max?.daily?.max || 365;
-        const maxDate = moment().add(maxDays, 'days');
+        // Match mobile implementation: Set maxDate to exactly 1 year from now
+        const maxDate = moment().add(1, 'year');
         return maxDate.toDate();
-    }, [duration_min_max]);
+    }, []);
 
     return (
         <div className='duration-input-desktop__wrapper'>
