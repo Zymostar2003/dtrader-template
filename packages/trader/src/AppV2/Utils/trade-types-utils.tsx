@@ -51,16 +51,6 @@ export const CONTRACT_LIST = {
 };
 
 export const AVAILABLE_CONTRACTS: TAvailableContract[] = [
-    // Growth Based
-    {
-        tradeType: 'Accumulators',
-        id: CONTRACT_LIST.ACCUMULATORS,
-        for: [TRADE_TYPES.ACCUMULATOR],
-        is_popular: true,
-        show_fire_icon: true,
-        category: 'growth_based',
-        tooltip: <Localize i18n_default_text='Grow your stake exponentially while price stays in range.' />,
-    },
     // Directional
     {
         tradeType: 'Rise/Fall',
@@ -70,6 +60,16 @@ export const AVAILABLE_CONTRACTS: TAvailableContract[] = [
         show_fire_icon: true,
         category: 'directional',
         tooltip: <Localize i18n_default_text='Earn when exit price is higher or lower than entry price.' />,
+    },
+    // Growth Based
+    {
+        tradeType: 'Accumulators',
+        id: CONTRACT_LIST.ACCUMULATORS,
+        for: [TRADE_TYPES.ACCUMULATOR],
+        is_popular: true,
+        show_fire_icon: true,
+        category: 'growth_based',
+        tooltip: <Localize i18n_default_text='Grow your stake exponentially while price stays in range.' />,
     },
     // Growth Based
     {
