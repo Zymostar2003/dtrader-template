@@ -60,15 +60,13 @@ const OnboardingGuideDesktop = ({ type = 'trade_page', callback }: TOnboardingGu
         setShouldRunGuide(false);
         setGuideDtraderV2Desktop({ ...guide_dtrader_v2_desktop, [type]: true });
         callback?.();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setGuideDtraderV2Desktop, type]);
+    }, [setGuideDtraderV2Desktop, guide_dtrader_v2_desktop, type, callback]);
 
     const onSkipGuide = React.useCallback(() => {
         setIsModalOpen(false);
         setGuideDtraderV2Desktop({ ...guide_dtrader_v2_desktop, [type]: true });
         callback?.();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setGuideDtraderV2Desktop, type]);
+    }, [setGuideDtraderV2Desktop, guide_dtrader_v2_desktop, type, callback]);
 
     React.useEffect(() => {
         if (!isDesktop) return;
