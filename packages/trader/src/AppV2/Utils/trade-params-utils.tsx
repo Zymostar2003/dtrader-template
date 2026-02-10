@@ -153,7 +153,8 @@ export const getTradeTypeTabsList = (contract_type = '') => {
     const is_vanilla = isVanillaContract(contract_type);
     const is_high_low = contract_type === TRADE_TYPES.HIGH_LOW;
     const is_touch = isTouchContract(contract_type);
-    const is_rise_fall = contract_type === TRADE_TYPES.RISE_FALL || contract_type === TRADE_TYPES.RISE_FALL_EQUAL;
+    const is_rise_fall_equal = contract_type === TRADE_TYPES.RISE_FALL_EQUAL;
+    const is_rise_fall = contract_type === TRADE_TYPES.RISE_FALL || is_rise_fall_equal;
     const tab_list = [
         {
             label: 'Up',
@@ -200,14 +201,14 @@ export const getTradeTypeTabsList = (contract_type = '') => {
         },
         {
             label: 'Rise',
-            value: TRADE_TYPES.RISE_FALL,
-            contract_type: CONTRACT_TYPES.CALL,
+            value: is_rise_fall_equal ? TRADE_TYPES.RISE_FALL_EQUAL : TRADE_TYPES.RISE_FALL,
+            contract_type: is_rise_fall_equal ? CONTRACT_TYPES.CALLE : CONTRACT_TYPES.CALL,
             is_displayed: is_rise_fall,
         },
         {
             label: 'Fall',
-            value: TRADE_TYPES.RISE_FALL,
-            contract_type: CONTRACT_TYPES.PUT,
+            value: is_rise_fall_equal ? TRADE_TYPES.RISE_FALL_EQUAL : TRADE_TYPES.RISE_FALL,
+            contract_type: is_rise_fall_equal ? CONTRACT_TYPES.PUTE : CONTRACT_TYPES.PUT,
             is_displayed: is_rise_fall,
         },
         {
