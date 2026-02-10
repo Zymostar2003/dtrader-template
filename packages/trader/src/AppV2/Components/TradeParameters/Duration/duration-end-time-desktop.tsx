@@ -69,15 +69,15 @@ const DurationEndTimeDesktop: React.FC<DurationEndTimeDesktopProps> = observer((
         if (duration_unit === 'd' && duration) {
             return moment().add(duration, 'days').toDate();
         }
-        // If expiry_date exists and is a future date, use it
+        // If expiry_date exists and is today or a future date, use it
         if (expiry_date) {
             const expiryMoment = moment(expiry_date);
-            if (expiryMoment.isAfter(moment())) {
+            if (expiryMoment.isSameOrAfter(moment(), 'day')) {
                 return expiryMoment.toDate();
             }
         }
-        // Default to tomorrow
-        return moment().add(1, 'day').toDate();
+        // Default to today
+        return moment().toDate();
     }, [expiry_date, duration_unit, duration]);
 
     // Helper to get initial time based on date
@@ -165,11 +165,15 @@ const DurationEndTimeDesktop: React.FC<DurationEndTimeDesktopProps> = observer((
 
     // Market times for time picker (only used when is_24_hours_contract is true)
     const start_times = useMemo(() => {
+        if (is_24_hours_contract) {
+            // For today, earliest selectable time is adjusted_start_time (server time + 5 min)
+            return [moment(adjusted_start_time, 'HH:mm')];
+        }
         if (market_open_times?.length > 0) {
             return market_open_times.map((time: string) => moment(time, 'HH:mm'));
         }
         return [moment().add(5, 'minutes')];
-    }, [market_open_times]);
+    }, [market_open_times, is_24_hours_contract, adjusted_start_time]);
 
     const end_times = useMemo(() => {
         if (market_open_times?.length > 0) {
