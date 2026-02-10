@@ -46,14 +46,14 @@ module.exports = function (env) {
             minimizer: MINIMIZERS,
             splitChunks: {
                 chunks: 'all',
-                minSize: 100000,
-                minSizeReduction: 102400,
+                minSize: 75000, // 75KB minimum chunk size for balanced granularity
+                minSizeReduction: 75000, // Match minSize for consistency
                 minChunks: 1,
-                maxSize: 2500000,
+                maxSize: 1000000, // 1MB max chunks - fewer chunks for better performance
                 maxAsyncRequests: 30,
                 maxInitialRequests: 30,
                 automaticNameDelimiter: '~',
-                enforceSizeThreshold: 500000,
+                enforceSizeThreshold: 1000000, // Allow enforced cache groups to be up to 1MB without splitting
                 cacheGroups: {
                     // Split vendor CSS into separate file
                     // This ensures vendor CSS loads before app CSS in HTML
@@ -69,16 +69,33 @@ module.exports = function (env) {
                         priority: 30,
                         enforce: true,
                     },
-                    // Split out large, stable chart library for better caching
-                    charts: {
-                        test: /[\\/]node_modules[\\/]@deriv-com[\\/]smartcharts-champion[\\/]/,
-                        name: 'charts',
-                        priority: 20,
+                    // React + MobX
+                    framework: {
+                        test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler|mobx|mobx-react-lite|mobx-utils)[\\/]/,
+                        name: 'framework-vendor',
+                        priority: 40,
+                        enforce: true,
+                        reuseExistingChunk: true,
+                    },
+                    // UI + shared/translations
+                    deriv: {
+                        test: /[\\/]node_modules[\\/](@deriv-com[\\/]ui|@deriv[\\/]components|@deriv[\\/]shared|@deriv-com[\\/]translations)[\\/]/,
+                        name: 'deriv-vendor',
+                        priority: 35,
+                        enforce: true,
+                        reuseExistingChunk: true,
+                    },
+                    // Split date/time libraries
+                    datetime: {
+                        test: /[\\/]node_modules[\\/](moment|dayjs)[\\/]/,
+                        name: 'datetime-vendor',
+                        priority: 28,
+                        enforce: true,
                         reuseExistingChunk: true,
                     },
                     default: {
                         minChunks: 2,
-                        minSize: 102400,
+                        minSize: 75000, // Match global minSize for consistency
                         priority: -20,
                         reuseExistingChunk: true,
                     },
@@ -86,6 +103,7 @@ module.exports = function (env) {
                         idHint: 'vendors',
                         test: /[\\/]node_modules[\\/]/,
                         priority: -10,
+                        reuseExistingChunk: true,
                     },
                 },
             },
