@@ -128,6 +128,7 @@
         &__chart {
             direction: ltr;
             overflow: hidden;
+            touch-action: none;
 
             @include mobile-screen {
                 border-top-left-radius: var(--core-borderRadius-400);
