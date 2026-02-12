@@ -8,6 +8,7 @@ import { getSymbolDisplayName, trackAnalyticsEvent } from '@deriv/shared';
 import { useStore } from '@deriv/stores';
 
 import AccumulatorStats from 'AppV2/Components/AccumulatorStats';
+import ClosedMarketMessage from 'AppV2/Components/ClosedMarketMessage';
 import CurrentSpot from 'AppV2/Components/CurrentSpot';
 import Guide from 'AppV2/Components/Guide';
 import MarketSelector from 'AppV2/Components/MarketSelector';
@@ -149,6 +150,7 @@ const Trade = observer(() => {
                             </section>
                         </div>
                         {is_accumulator && <AccumulatorStats />}
+                        <ClosedMarketMessage />
                     </div>
                     <TradeParametersContainer is_market_closed={is_market_closed} is_logged_in={is_logged_in} />
                     {!guide_dtrader_v2?.trade_page && is_logged_in && (

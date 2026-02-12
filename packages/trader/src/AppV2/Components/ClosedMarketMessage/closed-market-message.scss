@@ -12,10 +12,7 @@
             flex-direction: row;
             justify-content: space-between;
             width: 100%;
-            z-index: 3;
-            bottom: 0;
-            position: sticky;
-            border-radius: 0;
+            border-radius: var(--core-borderRadius-400);
         }
     }
     &--left {
