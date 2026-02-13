@@ -2,6 +2,18 @@
 import config_data from '../../../../../brand.config.json';
 import { appendLangParam } from '../url/helpers';
 
+/**
+ * Checks if the current environment should be treated as production.
+ * Returns true if NODE_ENV is 'production' OR if the runtime hostname is the beta platform.
+ */
+const isProductionEnvironment = (): boolean => {
+    if (process.env.NODE_ENV === 'production') return true;
+    if (typeof window !== 'undefined') {
+        return window.location.hostname === config_data.platform.hostname.beta;
+    }
+    return false;
+};
+
 export const getBrandDomain = () => {
     return config_data.brand_domain;
 };
@@ -15,19 +27,11 @@ export const getBrandLogo = () => {
 };
 
 export const getBrandHostname = () => {
-    // Determine environment - use production if NODE_ENV is production, otherwise staging
-    const isProduction = process.env.NODE_ENV === 'production';
-
-    // Return appropriate URL from brand config
-    return isProduction ? config_data.brand_hostname.production : config_data.brand_hostname.staging;
+    return isProductionEnvironment() ? config_data.brand_hostname.production : config_data.brand_hostname.staging;
 };
 
 export const getBrandUrl = () => {
-    // Determine environment - use production if NODE_ENV is production, otherwise staging
-    const isProduction = process.env.NODE_ENV === 'production';
-
-    // Return appropriate URL from brand config
-    return isProduction
+    return isProductionEnvironment()
         ? `https://${config_data.brand_hostname.production}`
         : `https://${config_data.brand_hostname.staging}`;
 };
@@ -56,8 +60,7 @@ export const getPlatformLogo = () => {
 };
 
 export const getPlatformHostname = () => {
-    // Check specific NODE_ENV values
-    if (process.env.NODE_ENV === 'production') {
+    if (isProductionEnvironment()) {
         return config_data.platform.hostname.production;
     } else if (process.env.NODE_ENV === 'staging') {
         return config_data.platform.hostname.staging;
@@ -81,11 +84,7 @@ export const getBetaPlatformHostname = () => {
 };
 
 export const getPlatformUrl = () => {
-    // Determine environment - use production if NODE_ENV is production, otherwise staging
-    const isProduction = process.env.NODE_ENV === 'production';
-
-    // Return appropriate URL from brand config
-    return isProduction
+    return isProductionEnvironment()
         ? `https://${config_data.platform.hostname.production}`
         : `https://${config_data.platform.hostname.staging}`;
 };
@@ -148,8 +147,7 @@ export const getLogoutURL = (isProductionEnv: boolean): string => {
  * @returns API Core base URL (without protocol)
  */
 export const getApiCoreUrl = (): string => {
-    const isProduction = process.env.NODE_ENV === 'production';
-    return isProduction ? config_data.api_core.production : config_data.api_core.staging;
+    return isProductionEnvironment() ? config_data.api_core.production : config_data.api_core.staging;
 };
 
 /**
