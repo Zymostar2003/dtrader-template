@@ -370,6 +370,17 @@ const StakeInput = observer(({ onClose, is_open }: TStakeInput) => {
         const is_equal = new_value === String(proposal_request_values.amount);
         if (is_equal) return;
 
+        // If both old and new values are numerically zero (e.g. "0" → "0.0" → "0.00"),
+        // update the display value without resetting the existing API error, since the
+        // proposal query key is identical (parseFloat produces 0 for all) and React Query
+        // returns a cached response that won't re-trigger the error-handling useEffect.
+        const current_amount = String(proposal_request_values.amount);
+        if (new_value !== '' && current_amount !== '' && Number(new_value) === 0 && Number(current_amount) === 0) {
+            dispatch({ type: 'SET_FE_STAKE_ERROR', payload: '' });
+            dispatch({ type: 'SET_PROPOSAL_VALUES', payload: { amount: new_value } });
+            return;
+        }
+
         dispatch({ type: 'RESET_ERRORS' });
         dispatch({
             type: 'SET_PROPOSAL_VALUES',
@@ -405,7 +416,6 @@ const StakeInput = observer(({ onClose, is_open }: TStakeInput) => {
             });
             return;
         }
-
         // Setting new stake value to the store and send it in streaming proposal
         onChange({ target: { name: 'amount', value: proposal_request_values.amount } });
         trackAnalyticsEvent('ce_trade_types_form_v2', {
