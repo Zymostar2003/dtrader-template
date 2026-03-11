@@ -61,7 +61,7 @@ export const redirectToLogin = async (_language?: string): Promise<void> => {
     window.location.replace(`${getAuthBaseUrl()}/oauth2/auth?${params}`);
 };
 
-export const redirectToSignUp = (): void => {
+export const redirectToSignUp = (_language?: string): void => {
     const signup_url = getSignupUrl();
     if (signup_url) window.open(signup_url, '_blank', 'noopener,noreferrer');
 };
