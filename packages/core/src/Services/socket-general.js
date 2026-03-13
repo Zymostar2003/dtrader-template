@@ -54,19 +54,13 @@ const BinarySocketGeneral = (() => {
 
         switch (response.msg_type) {
             case 'balance':
-                // Always process authorization on balance response
-                // This handles both initial connection and reconnection
                 if (response.balance && response.balance.loginid) {
-                    const loginid_changed = response.balance.loginid !== client_store.loginid;
-                    const not_yet_authorized = !client_store.is_authorize;
-
-                    // Only call authorizeAccount when needed
-                    if (loginid_changed || not_yet_authorized) {
-                        // Clear contract markers when account changes to prevent showing previous account's contracts
-                        if (loginid_changed) {
-                            client_store.root_store.contract_trade.clearContracts();
-                        }
+                    if (!client_store.is_authorize) {
+                        // First balance after (re)connect — use it as auth confirmation
                         authorizeAccount(response);
+                    } else {
+                        // Subsequent balance updates — just update the balance
+                        ResponseHandlers.balanceActiveAccount(response);
                     }
                 }
                 break;
@@ -156,7 +150,6 @@ const BinarySocketGeneral = (() => {
 
         client_store.responseAuthorize(authorize_data);
         client_store.setIsAuthorize(true); // Set BEFORE anything that depends on it
-        subscribeBalance(); // Continue balance subscription
         BinarySocket.sendBuffered(); // Now buffered calls see is_authorize = true
     };
 
@@ -172,16 +165,7 @@ export default BinarySocketGeneral;
 const ResponseHandlers = (() => {
     const balanceActiveAccount = response => {
         if (!response.error) {
-            // Check if this is the first balance response (contains auth data)
-            if (!client_store.is_authorize && response.balance && response.balance.loginid) {
-                // This is the authorization response - handled in onMessage
-                return;
-            }
-
-            // Regular balance update
             const balance = response.balance?.balance || response.balance;
-
-            // Only update if we have a valid balance
             if (balance !== undefined && balance !== null && balance !== '') {
                 BinarySocketGeneral.setBalanceActiveAccount({
                     balance,
@@ -190,8 +174,6 @@ const ResponseHandlers = (() => {
             }
         }
     };
-
-    // Removed balanceOtherAccounts - not needed for single account
 
     return {
         balanceActiveAccount,
