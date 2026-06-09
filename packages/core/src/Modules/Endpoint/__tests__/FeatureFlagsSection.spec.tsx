@@ -1,8 +1,11 @@
 import React from 'react';
+
+import { mockStore, StoreProvider } from '@deriv/stores';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { StoreProvider, mockStore } from '@deriv/stores';
-import brand_config from 'root/brand.config.json';
+
+// eslint-disable-next-line import/no-relative-packages
+import brand_config from '../../../../../../brand.config.json';
 import { FeatureFlagsSection } from '../FeatureFlagsSection';
 
 const FLAGS = {
