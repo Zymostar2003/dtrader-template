@@ -81,7 +81,11 @@ const rules = (is_test_env = false) => [
     },
     {
         test: /\.html$/,
-        exclude: /node_modules/,
+        // [AI] Exclude the HtmlWebpackPlugin entry template — html-loader would intercept it
+        // before HtmlWebpackPlugin's own lodash templating runs, leaving `<%= %>` placeholders
+        // (brand_name, platform_description, etc.) unsubstituted in the rendered page.
+        exclude: [/node_modules/, path.resolve(__dirname, '../src/index.html')],
+        // [/AI]
         use: html_loaders,
     },
     {
