@@ -1,0 +1,6 @@
+{
+    "installCommand": "npm ci --strict-peer-deps",
+    "buildCommand": "npm run generate:colors && npm run build:all",
+    "outputDirectory": "packages/core/dist",
+    "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
