@@ -1,5 +1,5 @@
 {
-    "brand_name": "Trading Platform",
+    "brand_name": "CEOSkit",
     "brand_logo": "brand/platform-logo.svg",
     "brand_logo_dark": "brand/platform-logo.svg",
     "brand_domain": "deriv.com",
@@ -8,7 +8,7 @@
         "production": "dtrader-template.pages.dev"
     },
     "platform": {
-        "name": "Trading Platform",
+        "name": "CEOSkitTheTrader",
         "description": "A whole new trading experience on a powerful yet easy to use platform.",
         "logo": "brand/platform-logo.svg",
         "home_url": "https://home.deriv.com/dashboard",
@@ -47,8 +47,8 @@
         "production": 16929
     },
     "colors": {
-        "primary": "#118e1c",
-        "secondary": "#85acb0",
+        "primary": "#FF0000",
+        "secondary": "#1a1a2e",
         "tertiary": "#ff6b35",
         "success": "#4bb4b3",
         "danger": "#ec3f3f",
